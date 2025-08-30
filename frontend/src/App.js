@@ -199,6 +199,15 @@ const api = {
     return await response.json();
   },
 
+  // Get single blog
+  getBlog: async (blogId) => {
+    const response = await fetch(`${API_BASE}/blogs/${blogId}`);
+    if (!response.ok) {
+      throw new Error('Failed to fetch blog');
+    }
+    return await response.json();
+  },
+
   // Delete blog
   deleteBlog: async (blogId) => {
     const token = localStorage.getItem('token');
@@ -437,7 +446,7 @@ const Header = ({ currentView, setCurrentView }) => {
 };
 
 // Blog Card Component
-const BlogCard = ({ blog, onLike, onComment, onRefresh }) => {
+const BlogCard = ({ blog, onLike, onComment, onRefresh, onBlogClick }) => {
   const { user } = useAuth();
   const [liked, setLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(Array.isArray(blog.likes) ? blog.likes.length : blog.likes || 0);
@@ -544,13 +553,31 @@ const BlogCard = ({ blog, onLike, onComment, onRefresh }) => {
           </div>
         </div>
         
-        <h3 className="text-xl font-bold text-dark-900 mb-3 line-clamp-2 group-hover:text-primary-700 transition-colors duration-300">
+        <h3 
+          className="text-xl font-bold text-dark-900 mb-3 line-clamp-2 group-hover:text-primary-700 transition-colors duration-300 cursor-pointer"
+          onClick={() => onBlogClick && onBlogClick(blog._id)}
+        >
           {blog.title}
         </h3>
         
-        <p className="text-dark-600 mb-4 line-clamp-3 leading-relaxed">
+        <p 
+          className="text-dark-600 mb-4 line-clamp-3 leading-relaxed cursor-pointer"
+          onClick={() => onBlogClick && onBlogClick(blog._id)}
+        >
           {blog.excerpt}
         </p>
+        
+        {/* Read More Button */}
+        <div className="mb-4">
+          <ModernButton
+            onClick={() => onBlogClick && onBlogClick(blog._id)}
+            variant="secondary"
+            size="sm"
+            className="text-primary-600 hover:text-primary-700"
+          >
+            Read Full Article →
+          </ModernButton>
+        </div>
         
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center space-x-4">
@@ -835,7 +862,7 @@ const LoginForm = ({ onSuccess }) => {
 };
 
 // Home Page Component
-const HomePage = () => {
+const HomePage = ({ onBlogClick }) => {
   const [blogs, setBlogs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
@@ -1026,6 +1053,7 @@ const HomePage = () => {
                   onLike={handleLike}
                   onComment={handleComment}
                   onRefresh={handleRefresh}
+                  onBlogClick={onBlogClick}
                 />
               </motion.div>
             ))}
@@ -1055,7 +1083,7 @@ const HomePage = () => {
 };
 
 // Trending Page Component
-const TrendingPage = () => {
+const TrendingPage = ({ onBlogClick }) => {
   const [trendingBlogs, setTrendingBlogs] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -1187,6 +1215,7 @@ const TrendingPage = () => {
                   onLike={handleLike}
                   onComment={handleComment}
                   onRefresh={handleRefresh}
+                  onBlogClick={onBlogClick}
                 />
               </motion.div>
             ))}
@@ -1706,6 +1735,335 @@ const UserProfile = () => {
   );
 };
 
+// Blog Detail Component
+const BlogDetail = ({ blogId, onBack }) => {
+  const [blog, setBlog] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [commentText, setCommentText] = useState('');
+  const [submittingComment, setSubmittingComment] = useState(false);
+  const { user } = useAuth();
+
+  useEffect(() => {
+    loadBlog();
+  }, [blogId]);
+
+  const loadBlog = async () => {
+    setLoading(true);
+    setError('');
+    try {
+      const data = await api.getBlog(blogId);
+      setBlog(data);
+    } catch (error) {
+      console.error('Error loading blog:', error);
+      setError('Failed to load blog post');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleLike = async () => {
+    if (!user) {
+      alert('Please login to like blogs');
+      return;
+    }
+
+    try {
+      const response = await api.toggleLike(blog._id);
+      setBlog(prev => ({
+        ...prev,
+        likes: response.isLiked ? 
+          [...(Array.isArray(prev.likes) ? prev.likes : []), user.id] :
+          (Array.isArray(prev.likes) ? prev.likes.filter(id => id !== user.id) : [])
+      }));
+    } catch (error) {
+      console.error('Error toggling like:', error);
+      alert('Failed to update like');
+    }
+  };
+
+  const handleAddComment = async (e) => {
+    e.preventDefault();
+    if (!user) {
+      alert('Please login to comment');
+      return;
+    }
+    
+    if (!commentText.trim()) return;
+
+    setSubmittingComment(true);
+    try {
+      const newComment = await api.addComment(blog._id, commentText);
+      setBlog(prev => ({
+        ...prev,
+        comments: [...(prev.comments || []), newComment]
+      }));
+      setCommentText('');
+    } catch (error) {
+      console.error('Error adding comment:', error);
+      alert('Failed to add comment');
+    } finally {
+      setSubmittingComment(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <motion.div 
+        className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.6 }}
+      >
+        <div className="animate-pulse space-y-8">
+          <div className="h-8 bg-gray-200 rounded w-3/4"></div>
+          <div className="h-64 bg-gray-200 rounded"></div>
+          <div className="space-y-4">
+            {[...Array(8)].map((_, i) => (
+              <div key={i} className="h-4 bg-gray-200 rounded"></div>
+            ))}
+          </div>
+        </div>
+      </motion.div>
+    );
+  }
+
+  if (error || !blog) {
+    return (
+      <motion.div 
+        className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 text-center"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.6 }}
+      >
+        <div className="text-red-600 mb-4">
+          <h2 className="text-2xl font-bold mb-2">Blog Not Found</h2>
+          <p>{error || 'The blog post you\'re looking for doesn\'t exist.'}</p>
+        </div>
+        <ModernButton onClick={onBack} variant="primary">
+          ← Back to Blogs
+        </ModernButton>
+      </motion.div>
+    );
+  }
+
+  const liked = user && Array.isArray(blog.likes) && blog.likes.includes(user.id);
+  const likeCount = Array.isArray(blog.likes) ? blog.likes.length : blog.likes || 0;
+
+  return (
+    <motion.div 
+      className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8"
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.6 }}
+    >
+      {/* Back Button */}
+      <motion.div className="mb-6">
+        <ModernButton 
+          onClick={onBack}
+          variant="secondary"
+          size="sm"
+        >
+          ← Back to Blogs
+        </ModernButton>
+      </motion.div>
+
+      {/* Blog Header */}
+      <motion.div 
+        className="mb-8"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, delay: 0.2 }}
+      >
+        {blog.featuredImage && (
+          <div className="mb-8 rounded-2xl overflow-hidden">
+            <img 
+              src={blog.featuredImage} 
+              alt={blog.title}
+              className="w-full h-64 md:h-96 object-cover"
+            />
+          </div>
+        )}
+        
+        <h1 className="text-3xl md:text-4xl font-bold text-dark-900 mb-6 leading-tight">
+          {blog.title}
+        </h1>
+        
+        <div className="flex flex-wrap items-center gap-4 mb-6 text-sm text-dark-500">
+          <div className="flex items-center">
+            <div className="w-8 h-8 bg-gradient-to-r from-primary-500 to-purple-500 rounded-full flex items-center justify-center mr-3">
+              <User className="w-4 h-4 text-white" />
+            </div>
+            <span className="font-medium text-dark-700">
+              {blog.author?.username || 'Unknown Author'}
+            </span>
+          </div>
+          <div className="flex items-center text-dark-400">
+            <Calendar className="w-4 h-4 mr-2" />
+            <span>{new Date(blog.createdAt).toLocaleDateString('en-US', { 
+              year: 'numeric', 
+              month: 'long', 
+              day: 'numeric' 
+            })}</span>
+          </div>
+          <div className="flex items-center text-dark-400">
+            <Eye className="w-4 h-4 mr-2" />
+            <span>{blog.views || 0} views</span>
+          </div>
+          <ModernBadge variant="glass" size="sm">
+            {blog.category}
+          </ModernBadge>
+        </div>
+
+        {/* Tags */}
+        {blog.tags && blog.tags.length > 0 && (
+          <div className="flex flex-wrap gap-2 mb-6">
+            {blog.tags.map((tag, index) => (
+              <ModernBadge 
+                key={index} 
+                variant="glass" 
+                size="sm"
+              >
+                #{tag}
+              </ModernBadge>
+            ))}
+          </div>
+        )}
+      </motion.div>
+
+      {/* Blog Content */}
+      <motion.div 
+        className="prose prose-lg max-w-none mb-12"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, delay: 0.4 }}
+      >
+        <div 
+          className="text-dark-700 leading-relaxed whitespace-pre-wrap"
+          style={{ wordBreak: 'break-word' }}
+        >
+          {blog.content}
+        </div>
+      </motion.div>
+
+      {/* Interaction Bar */}
+      <motion.div 
+        className="flex items-center justify-between py-6 border-t border-b border-gray-200 mb-8"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, delay: 0.6 }}
+      >
+        <div className="flex items-center space-x-6">
+          <motion.button 
+            onClick={handleLike}
+            className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-all duration-300 ${
+              liked ? 'text-red-500 bg-red-50' : 'text-dark-500 hover:text-red-500 hover:bg-red-50'
+            }`}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+          >
+            <Heart className={`w-5 h-5 transition-all duration-300 ${liked ? 'fill-current' : ''}`} />
+            <span className="font-medium">{likeCount} Likes</span>
+          </motion.button>
+          
+          <div className="flex items-center space-x-2 text-dark-500">
+            <MessageCircle className="w-5 h-5" />
+            <span className="font-medium">
+              {Array.isArray(blog.comments) ? blog.comments.length : blog.comments || 0} Comments
+            </span>
+          </div>
+        </div>
+      </motion.div>
+
+      {/* Comments Section */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, delay: 0.8 }}
+      >
+        <h3 className="text-2xl font-bold text-dark-900 mb-6">
+          Comments ({Array.isArray(blog.comments) ? blog.comments.length : 0})
+        </h3>
+        
+        {/* Add Comment Form */}
+        {user ? (
+          <motion.form
+            onSubmit={handleAddComment}
+            className="mb-8"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3, delay: 1 }}
+          >
+            <div className="flex space-x-4">
+              <div className="w-10 h-10 bg-gradient-to-r from-primary-500 to-purple-500 rounded-full flex items-center justify-center">
+                <User className="w-5 h-5 text-white" />
+              </div>
+              <div className="flex-1">
+                <textarea
+                  value={commentText}
+                  onChange={(e) => setCommentText(e.target.value)}
+                  placeholder="Write a comment..."
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 resize-none"
+                  rows="3"
+                  disabled={submittingComment}
+                />
+                <div className="flex justify-end mt-3">
+                  <ModernButton
+                    type="submit"
+                    disabled={submittingComment || !commentText.trim()}
+                    variant="primary"
+                    size="sm"
+                  >
+                    {submittingComment ? 'Posting...' : 'Post Comment'}
+                  </ModernButton>
+                </div>
+              </div>
+            </div>
+          </motion.form>
+        ) : (
+          <div className="text-center py-6 bg-gray-50 rounded-lg mb-8">
+            <p className="text-dark-600">Please login to add comments</p>
+          </div>
+        )}
+
+        {/* Comments List */}
+        <div className="space-y-6">
+          {blog.comments && blog.comments.length > 0 ? (
+            blog.comments.map((comment, index) => (
+              <motion.div
+                key={comment._id || index}
+                className="flex space-x-4 p-4 bg-gray-50 rounded-lg"
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.3, delay: 1.2 + (index * 0.1) }}
+              >
+                <div className="w-10 h-10 bg-gradient-to-r from-primary-500 to-purple-500 rounded-full flex items-center justify-center">
+                  <User className="w-5 h-5 text-white" />
+                </div>
+                <div className="flex-1">
+                  <div className="flex items-center space-x-3 mb-2">
+                    <span className="font-medium text-dark-900">
+                      {comment.user?.username || 'Anonymous'}
+                    </span>
+                    <span className="text-sm text-dark-500">
+                      {comment.createdAt ? new Date(comment.createdAt).toLocaleDateString() : 'Recently'}
+                    </span>
+                  </div>
+                  <p className="text-dark-700">{comment.text || comment.content}</p>
+                </div>
+              </motion.div>
+            ))
+          ) : (
+            <div className="text-center py-8">
+              <p className="text-dark-500">No comments yet. Be the first to comment!</p>
+            </div>
+          )}
+        </div>
+      </motion.div>
+    </motion.div>
+  );
+};
+
 // Admin Dashboard Component
 const AdminDashboard = () => {
   const [stats, setStats] = useState({
@@ -2167,6 +2525,7 @@ const AdminDashboard = () => {
 const App = () => {
   const { user } = useAuth();
   const [currentView, setCurrentView] = useState('home');
+  const [selectedBlogId, setSelectedBlogId] = useState(null);
 
   const handleLoginSuccess = () => {
     setCurrentView('home');
@@ -2176,26 +2535,42 @@ const App = () => {
     setCurrentView('profile');
   };
 
+  const handleBlogClick = (blogId) => {
+    setSelectedBlogId(blogId);
+    setCurrentView('detail');
+  };
+
+  const handleBackToBlogs = () => {
+    setSelectedBlogId(null);
+    setCurrentView('home');
+  };
+
   const renderCurrentView = () => {
-    if (!user && currentView !== 'home' && currentView !== 'trending') {
+    if (!user && currentView !== 'home' && currentView !== 'trending' && currentView !== 'detail') {
       return <LoginForm onSuccess={handleLoginSuccess} />;
     }
 
     switch (currentView) {
       case 'home':
-        return <HomePage />;
+        return <HomePage onBlogClick={handleBlogClick} />;
       case 'trending':
-        return <TrendingPage />;
+        return <TrendingPage onBlogClick={handleBlogClick} />;
+      case 'detail':
+        return selectedBlogId ? (
+          <BlogDetail blogId={selectedBlogId} onBack={handleBackToBlogs} />
+        ) : (
+          <HomePage onBlogClick={handleBlogClick} />
+        );
       case 'create':
         return <CreateBlog onSuccess={handleBlogCreateSuccess} />;
       case 'profile':
         return <UserProfile />;
       case 'admin':
-        return user?.role === 'admin' ? <AdminDashboard /> : <HomePage />;
+        return user?.role === 'admin' ? <AdminDashboard /> : <HomePage onBlogClick={handleBlogClick} />;
       case 'login':
         return <LoginForm onSuccess={handleLoginSuccess} />;
       default:
-        return <HomePage />;
+        return <HomePage onBlogClick={handleBlogClick} />;
     }
   };
 
