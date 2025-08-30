@@ -1,0 +1,92 @@
+MIT License with Attribution Requirements
+
+Copyright (c) 2025 DevNovate Blog Platform Development Team
+Bhilai Institute of Technology, Durg, Chhattisgarh, India
+
+CREATED BY:
+Four dedicated students from Bhilai Institute of Technology (BIT), Durg:
+- Student 1: [ARBAB RIFFAT SHAHNAWAZ] - [Frontend Development/UI-UX/Backend dev]
+- Student 2: [AYUSH KUMAR PARGANIHA ] - [Backend Development/API Design] 
+- Student 3: [SHEIKH ABDUL ZEESHAN] - [Testing/Database Design/Authentication/Backend]
+- Student 4: [LAKSHYA PARMAR] - [Project Management/Testing/Backend]
+
+Institution: Bhilai Institute of Technology (BIT)
+Location: Durg, Chhattisgarh, India
+Project Type: Academic Innovation Project / Hackathon Submission
+Year: 2025
+
+ABOUT THE PROJECT:
+DevNovate is a comprehensive full-stack blog platform built using the MERN stack
+(MongoDB, Express.js, React.js, Node.js) designed to provide a modern, feature-rich
+blogging experience for developers and technology enthusiasts.
+
+Key Features:
+- User authentication and authorization
+- Rich blog creation and editing interface
+- Content management and moderation system
+- Admin dashboard with analytics
+- Responsive design with modern UI/UX
+- Real-time feedback and interaction features
+- User feedback collection system
+
+ATTRIBUTION REQUIREMENTS:
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+1. MANDATORY ATTRIBUTION: Any use, modification, or distribution of this software
+   MUST include proper attribution to the original creators and institution:
+   
+   "Originally developed by students of Bhilai Institute of Technology, Durg"
+   "DevNovate Blog Platform © 2025 BIT Durg Development Team"
+
+2. CREDIT REQUIREMENTS: The above copyright notice and this permission notice
+   shall be included in all copies or substantial portions of the Software.
+
+3. EDUCATIONAL ACKNOWLEDGMENT: If used for educational purposes, proper credit
+   must be given to Bhilai Institute of Technology and the student development team.
+
+4. COMMERCIAL USE: Commercial use is permitted provided that proper attribution
+   is maintained and the original creators are credited.
+
+5. DERIVATIVE WORKS: Any derivative works must clearly indicate the original source
+   and maintain attribution to the BIT Durg development team.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+INSTITUTIONAL DISCLAIMER:
+This project was developed as part of academic activities at Bhilai Institute
+of Technology, Durg. The institution supports student innovation and 
+open-source contributions to the technology community.
+
+CONTACT INFORMATION:
+For questions about this project or licensing:
+- Institution: Bhilai Institute of Technology, Durg
+- Location: Durg, Chhattisgarh, India
+- Project: DevNovate Blog Platform
+- Year: 2025
+
+TECHNICAL SPECIFICATIONS:
+- Frontend: React.js with modern hooks and context API
+- Backend: Node.js with Express.js framework
+- Database: MongoDB with Mongoose ODM
+- Authentication: JWT-based authentication system
+- Styling: Tailwind CSS with custom design system
+- Features: Blog management, user profiles, admin dashboard, content moderation
+
+ACKNOWLEDGMENTS:
+Special thanks to the faculty and staff at Bhilai Institute of Technology
+for their guidance and support in this project development.
+
+This project represents the collaborative effort and technical skills
+of emerging software developers from BIT Durg, contributing to the
+open-source community while showcasing academic excellence.
