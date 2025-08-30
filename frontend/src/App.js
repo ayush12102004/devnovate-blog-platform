@@ -2137,6 +2137,38 @@ const AdminDashboard = () => {
     }
   };
 
+  const handleDeleteBlog = async (blogId, blogTitle) => {
+    // Confirm deletion
+    if (!window.confirm(`Are you sure you want to permanently delete "${blogTitle}"? This action cannot be undone.`)) {
+      return;
+    }
+
+    try {
+      // Call API to delete blog
+      await api.deleteBlog(blogId);
+      
+      // Update local state - remove blog from both lists
+      setPendingBlogs(prev => prev.filter(blog => blog._id !== blogId));
+      setAllBlogs(prev => prev.filter(blog => blog._id !== blogId));
+      
+      // Update stats
+      const deletedBlog = allBlogs.find(blog => blog._id === blogId);
+      if (deletedBlog) {
+        setStats(prev => ({
+          ...prev,
+          totalBlogs: prev.totalBlogs - 1,
+          pendingBlogs: deletedBlog.status === 'pending' ? prev.pendingBlogs - 1 : prev.pendingBlogs,
+          approvedBlogs: deletedBlog.status === 'approved' ? prev.approvedBlogs - 1 : prev.approvedBlogs
+        }));
+      }
+      
+      alert('Blog deleted successfully!');
+    } catch (error) {
+      console.error('Error deleting blog:', error);
+      alert(`Failed to delete blog: ${error.message}`);
+    }
+  };
+
   if (loading) {
     return (
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -2483,6 +2515,7 @@ const AdminDashboard = () => {
                             </ModernButton>
                           )}
                           <ModernButton
+                            onClick={() => handleDeleteBlog(blog._id, blog.title)}
                             variant="danger"
                             size="xs"
                             icon={Trash2}
