@@ -2619,7 +2619,14 @@ const App = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="text-center">
             <h3 className="text-lg font-semibold text-gray-900 mb-2">DevNovate Blog Platform</h3>
-            <p className="text-gray-600 mb-4">Built with MERN Stack for VIBE HACK 2025</p>
+            <div className="mb-4 max-w-4xl mx-auto">
+              <p className="text-gray-700 font-medium text-sm md:text-base leading-relaxed">
+                CRAFTED WITH PASSION AND CHAOS BY TEAM HAHAKAAR —
+              </p>
+              <p className="text-gray-600 text-sm md:text-base mt-1">
+                AYUSH KUMAR PARGANIHA, LAKSHYA PARMAR, ARBAB RIFFAT SHAHNAWAZ & SHEIKH ABDUL ZEESHAN
+              </p>
+            </div>
             <div className="flex justify-center space-x-6 text-sm text-gray-500">
               <button onClick={() => setCurrentView('home')} className="hover:text-gray-700">Home</button>
               <button onClick={() => setCurrentView('trending')} className="hover:text-gray-700">Trending</button>
