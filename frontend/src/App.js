@@ -2621,10 +2621,9 @@ const App = () => {
             <h3 className="text-lg font-semibold text-gray-900 mb-2">DevNovate Blog Platform</h3>
             <div className="mb-4 max-w-4xl mx-auto">
               <p className="text-gray-700 font-medium text-sm md:text-base leading-relaxed">
-                CRAFTED WITH PASSION AND CHAOS BY ---
+                CRAFTED WITH PASSION AND CHAOS
               </p>
               <p className="text-gray-600 text-sm md:text-base mt-1">
-                AYUSH KUMAR PARGANIHA, ADITI SINGH AND KRISHNA GUPTA
               </p>
             </div>
             <div className="flex justify-center space-x-6 text-sm text-gray-500">
