@@ -1744,11 +1744,7 @@ const BlogDetail = ({ blogId, onBack }) => {
   const [submittingComment, setSubmittingComment] = useState(false);
   const { user } = useAuth();
 
-  useEffect(() => {
-    loadBlog();
-  }, [blogId]);
-
-  const loadBlog = async () => {
+  const loadBlog = useCallback(async () => {
     setLoading(true);
     setError('');
     try {
@@ -1760,7 +1756,11 @@ const BlogDetail = ({ blogId, onBack }) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [blogId]);
+
+  useEffect(() => {
+    loadBlog();
+  }, [loadBlog]);
 
   const handleLike = async () => {
     if (!user) {
